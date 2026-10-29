@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>OXIMORO | Looks</title>
+  <title>OXIMORO | Coleção</title>
   <style>
     :root {
       --fundo: #f3f4f0;   /* cor enquanto a imagem carrega */
