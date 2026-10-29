@@ -1,1 +1,157 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OXIMORO</title>
+  <style>
+    @font-face {
+      font-family: "Tanker";
+      src: url("fonts/tanker-regular.woff2") format("woff2");
+      font-weight: 400;
+      font-style: normal;
+      font-display: block;
+    }
+
+    :root {
+      --fundo: #870c0c;
+      --texto: #f3f4f0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(1.5rem, 6vw, 5rem);
+      background: var(--fundo);
+      color: var(--texto);
+      animation: entrar 0.5s ease;
+    }
+
+    @keyframes entrar {
+      from { opacity: 0; }
+    }
+
+    p {
+      width: min(100%, 26em);
+      font-family: "Tanker", Impact, "Arial Narrow", sans-serif;
+      font-weight: 400;
+      font-size: clamp(1.6rem, 4.2vw, 3.4rem);
+      line-height: 1.15;
+      letter-spacing: 0.01em;
+      text-align: left;
+    }
+
+    /* cada palavra fica inteira na mesma linha */
+    .palavra {
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    /* as letras só somem quando o JavaScript está ativo */
+    .js .letra {
+      opacity: 0;
+      transition: opacity 0.12s linear;
+    }
+
+    .js .letra.on {
+      opacity: 1;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <p id="texto">OXIMORO é um conceito que manifesta a convivência de forças contrárias dentro de um mesmo fenômeno. Ele evidencia como realidades opostas podem coexistir, criando um espaço onde a contradição deixa de ser um erro e passa a ser um estado legítimo do mundo. Nesse encontro entre extremos, surge uma terceira possibilidade: uma percepção ampliada, que reconhece a complexidade das coisas. O oxímoro revela que nada é totalmente fixo ou puro, tudo pulsa entre tensões, paradoxos e dualidades que, juntas, constroem novas formas de entender o que nos cerca.</p>
+
+  <script>
+    (function () {
+      var MS_POR_LETRA = 24;      // velocidade da digitação
+      var PAUSA_VIRGULA = 120;    // pausa extra depois de vírgula (ms)
+      var PAUSA_PONTO = 350;      // pausa extra depois de ponto ou dois-pontos (ms)
+
+      // quem pediu menos movimento vê o texto completo de uma vez
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      var texto = document.getElementById("texto");
+      var original = texto.textContent.trim().replace(/\s+/g, " ").normalize("NFC");
+
+      document.documentElement.classList.add("js");
+      texto.setAttribute("aria-label", original);
+      texto.textContent = "";
+
+      // monta palavra por palavra, letra por letra, sem mudar a quebra de linha final
+      var letras = [];
+      var palavras = original.split(" ");
+      palavras.forEach(function (palavra, i) {
+        var caixa = document.createElement("span");
+        caixa.className = "palavra";
+        caixa.setAttribute("aria-hidden", "true");
+        Array.from(palavra).forEach(function (caractere) {
+          var letra = document.createElement("span");
+          letra.className = "letra";
+          letra.textContent = caractere;
+          caixa.appendChild(letra);
+          letras.push(letra);
+        });
+        texto.appendChild(caixa);
+        if (i < palavras.length - 1) texto.appendChild(document.createTextNode(" "));
+      });
+
+      // momento em que cada letra aparece
+      var t = 0;
+      var momentos = letras.map(function (letra) {
+        var agora = t;
+        var c = letra.textContent;
+        t += MS_POR_LETRA;
+        if (c === ",") t += PAUSA_VIRGULA;
+        else if (c === "." || c === ":") t += PAUSA_PONTO;
+        return agora;
+      });
+
+      var proxima = 0;
+
+      function mostrarTudo() {
+        for (; proxima < letras.length; proxima++) letras[proxima].classList.add("on");
+      }
+
+      function iniciar() {
+        var inicio = performance.now();
+
+        function quadro(agora) {
+          var decorrido = agora - inicio;
+          while (proxima < letras.length && momentos[proxima] <= decorrido) {
+            letras[proxima++].classList.add("on");
+          }
+          if (proxima < letras.length) requestAnimationFrame(quadro);
+        }
+
+        requestAnimationFrame(quadro);
+
+        // clique, toque ou tecla mostram o texto inteiro na hora
+        ["click", "touchstart", "keydown"].forEach(function (evento) {
+          window.addEventListener(evento, mostrarTudo, { once: true });
+        });
+      }
+
+      // espera a fonte carregar (no máximo 1,5 s) para o texto já aparecer na fonte certa
+      var fonte = (document.fonts && document.fonts.load)
+        ? document.fonts.load('1em "Tanker"')
+        : Promise.resolve();
+      var limite = new Promise(function (resolve) { setTimeout(resolve, 1500); });
+      Promise.race([fonte, limite]).then(iniciar, iniciar);
+    })();
+  </script>
+</body>
+</html>
