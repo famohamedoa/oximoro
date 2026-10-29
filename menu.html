@@ -1,1 +1,94 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OXIMORO | Menu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --fundo: #f3f4f0;   /* cor enquanto a imagem carrega */
+      --texto: #870c0c;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      background-color: var(--fundo);
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: clamp(1.5rem, 5vw, 4rem);
+      background: var(--fundo) url("imagens/fundo.png") center / cover no-repeat;
+      color: var(--texto);
+      font-family: "Rubik", system-ui, sans-serif;
+      font-weight: 500;
+      animation: entrar 0.5s ease;
+    }
+
+    @keyframes entrar {
+      from { opacity: 0; }
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    a {
+      display: inline-block;
+      padding: 0.08em 0;
+      color: inherit;
+      text-decoration: none;
+      font-size: clamp(1.8rem, min(9vw, 7.5vh), 5.5rem);
+      line-height: 1.05;
+      transition: opacity 0.2s ease;
+    }
+
+    /* ao passar o mouse (ou focar com o teclado), os outros itens esmaecem */
+    ul:hover a,
+    ul:focus-within a {
+      opacity: 0.4;
+    }
+
+    ul a:hover,
+    ul a:focus-visible {
+      opacity: 1;
+    }
+
+    a:focus-visible {
+      outline: 2px solid var(--texto);
+      outline-offset: 4px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body { animation: none; }
+      a { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav aria-label="Menu principal">
+    <ul>
+      <li><a href="conceito.html">CONCEITO</a></li>
+      <li><a href="moodboard.html">MOODBOARD</a></li>
+      <li><a href="persona.html">PERSONA</a></li>
+      <li><a href="trendboard.html">TRENDBOARD</a></li>
+      <li><a href="cores.html">CORES</a></li>
+      <li><a href="materiais.html">MATERIAIS</a></li>
+      <li><a href="estampas.html">ESTAMPAS</a></li>
+      <li><a href="looks.html">LOOKS</a></li>
+      <li><a href="colecao.html">COLEÇÃO</a></li>
+      <li><a href="desfile.html">DESFILE</a></li>
+    </ul>
+  </nav>
+</body>
+</html>
