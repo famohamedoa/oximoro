@@ -108,7 +108,7 @@
       display: block;
       height: var(--altura);
       width: auto;
-      transition: transform 0.35s ease;
+      transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.4s ease, opacity 0.4s ease;
     }
 
     /* o passar do mouse traz a imagem para a frente e aumenta */
@@ -116,8 +116,19 @@
       z-index: 50;
     }
 
+    /* a imagem sob o mouse cresce quase até a altura da tela (--zoom, --dx e --dy vêm do JavaScript) */
     .looks li:hover img {
-      transform: scale(1.12);
+      transform: translate(var(--dx, 0px), var(--dy, 0px)) scale(var(--zoom, 1.5));
+    }
+
+    /* EFEITO NAS OUTRAS IMAGENS: troque a classe do <body class="efeito-pb"> entre "efeito-pb" e "efeito-blur" */
+    .efeito-pb .looks:hover li:not(:hover) img {
+      filter: grayscale(1);
+    }
+
+    .efeito-blur .looks:hover li:not(:hover) img {
+      filter: blur(6px);
+      opacity: 0.45;
     }
 
     /* as imagens só ficam escondidas quando o JavaScript está ativo */
@@ -165,6 +176,35 @@
       <li><img src="imagens/41.png" alt="Look 12"></li>
     </ul>
   </main>
+
+  <script>
+    // ao passar o mouse, calcula quanto a imagem cresce e o quanto precisa se deslocar para caber inteira na tela
+    (function () {
+      var FOLGA = 24;   // espaço mínimo até a borda da tela (px)
+
+      document.querySelectorAll("#looks li").forEach(function (li) {
+        li.addEventListener("mouseenter", function () {
+          var img = li.querySelector("img");
+          var caixa = li.getBoundingClientRect();
+          var vw = document.documentElement.clientWidth;
+          var vh = window.innerHeight;
+
+          var zoom = (vh - 2 * FOLGA) / caixa.height;
+          var largura = caixa.width * zoom;
+
+          // centraliza na vertical e mantém dentro da tela na horizontal
+          var cx = caixa.left + caixa.width / 2;
+          var esquerda = Math.max(FOLGA, Math.min(cx - largura / 2, vw - FOLGA - largura));
+          var dx = esquerda + largura / 2 - cx;
+          var dy = vh / 2 - (caixa.top + caixa.height / 2);
+
+          img.style.setProperty("--zoom", zoom.toFixed(3));
+          img.style.setProperty("--dx", dx.toFixed(1) + "px");
+          img.style.setProperty("--dy", dy.toFixed(1) + "px");
+        });
+      });
+    })();
+  </script>
 
   <script>
     (function () {
