@@ -5,16 +5,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>OXIMORO</title>
+  <noscript><meta http-equiv="refresh" content="30;url=menu.html"></noscript>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300&display=block" rel="stylesheet">
   <style>
-    @font-face {
-      font-family: "Tanker";
-      src: url("fonts/tanker-regular.woff2") format("woff2"),
-           url("fonts/Tanker-Regular.woff2") format("woff2");
-      font-weight: 400;
-      font-style: normal;
-      font-display: block;
-    }
-
     :root {
       --fundo: #870c0c;
       --texto: #f3f4f0;
@@ -36,6 +31,11 @@
       background: var(--fundo);
       color: var(--texto);
       animation: entrar 0.5s ease;
+      transition: opacity 0.5s ease;
+    }
+
+    body.saindo {
+      opacity: 0;
     }
 
     @keyframes entrar {
@@ -43,12 +43,11 @@
     }
 
     p {
-      width: min(100%, 26em);
-      font-family: "Tanker", sans-serif;
-      font-weight: 400;
-      font-size: clamp(1.6rem, 4.2vw, 3.4rem);
-      line-height: 1.15;
-      letter-spacing: 0.01em;
+      width: min(100%, 62ch);
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-weight: 300;
+      font-size: clamp(1.1rem, 2.2vw, 2rem);
+      line-height: 1.5;
       text-align: left;
     }
 
@@ -82,8 +81,32 @@
       var PAUSA_VIRGULA = 120;    // pausa extra depois de vírgula (ms)
       var PAUSA_PONTO = 350;      // pausa extra depois de ponto ou dois-pontos (ms)
 
+      var ESPERA_FINAL = 5000;           // tempo com o texto completo na tela antes de abrir o menu (ms)
+      var ESPERA_SEM_ANIMACAO = 30000;   // para quem vê o texto de uma vez (sem digitação), mais tempo de leitura (ms)
+      var DESVANECER = 500;              // duração do fade final (ms)
+      var DESTINO = "menu.html";
+
+      var reduzir = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var saidaAgendada = false;
+
+      function agendarSaida(espera) {
+        if (saidaAgendada) return;
+        saidaAgendada = true;
+        if (!reduzir) {
+          setTimeout(function () {
+            document.body.classList.add("saindo");
+          }, espera - DESVANECER);
+        }
+        setTimeout(function () {
+          window.location.replace(DESTINO);
+        }, espera);
+      }
+
       // quem pediu menos movimento vê o texto completo de uma vez
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (reduzir) {
+        agendarSaida(ESPERA_SEM_ANIMACAO);
+        return;
+      }
 
       var texto = document.getElementById("texto");
       var original = texto.textContent.trim().replace(/\s+/g, " ").normalize("NFC");
@@ -125,6 +148,7 @@
 
       function mostrarTudo() {
         for (; proxima < letras.length; proxima++) letras[proxima].classList.add("on");
+        agendarSaida(ESPERA_FINAL);
       }
 
       function iniciar() {
@@ -136,6 +160,7 @@
             letras[proxima++].classList.add("on");
           }
           if (proxima < letras.length) requestAnimationFrame(quadro);
+          else agendarSaida(ESPERA_FINAL);
         }
 
         requestAnimationFrame(quadro);
@@ -148,7 +173,7 @@
 
       // espera a fonte carregar (no máximo 1,5 s) para o texto já aparecer na fonte certa
       var fonte = (document.fonts && document.fonts.load)
-        ? document.fonts.load('1em "Tanker"')
+        ? document.fonts.load('300 1em "IBM Plex Mono"')
         : Promise.resolve();
       var limite = new Promise(function (resolve) { setTimeout(resolve, 1500); });
       Promise.race([fonte, limite]).then(iniciar, iniciar);
