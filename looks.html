@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -12,14 +11,15 @@
       --margem: clamp(1.5rem, 5vw, 4rem);
 
       /* quanto uma imagem cobre da vizinha (0 = lado a lado, 0.5 = metade). Pode ser negativo no CSS = espaço. */
-      --sobreposicao: 0.4;
+      --sobreposicao: 0.6;
       /* proporção aproximada das imagens (largura / altura) */
       --proporcao: 0.7;
 
-      /* altura única de todas as imagens: cabe na largura da tela e em no máximo 80% da altura */
+      /* altura única de todas as imagens: ocupa quase toda a tela, mas sempre cabe na largura */
+      --lateral: clamp(1rem, 2vw, 2rem);
       --altura: min(
-        80vh,
-        calc((100vw - 2 * var(--margem)) / (12 * var(--proporcao) - 11 * var(--proporcao) * var(--sobreposicao)))
+        calc(100vh - 8rem),
+        calc((100vw - 2 * var(--lateral)) / (12 * var(--proporcao) - 11 * var(--proporcao) * var(--sobreposicao)))
       );
     }
 
@@ -39,8 +39,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: clamp(4rem, 12vh, 7rem) var(--margem) clamp(2rem, 6vh, 4rem);
-      background: var(--fundo) url("imagens/fundo.png") center / cover no-repeat;
+      padding: 4.5rem var(--lateral) 2.5rem;
+      background: var(--fundo);
       color: var(--texto);
       animation: entrar 0.5s ease;
     }
@@ -108,11 +108,16 @@
       display: block;
       height: var(--altura);
       width: auto;
+      transition: transform 0.35s ease;
     }
 
-    /* o passar do mouse traz a imagem para a frente */
+    /* o passar do mouse traz a imagem para a frente e aumenta */
     .looks li:hover {
       z-index: 50;
+    }
+
+    .looks li:hover img {
+      transform: scale(1.12);
     }
 
     /* as imagens só ficam escondidas quando o JavaScript está ativo */
@@ -130,6 +135,7 @@
     @media (prefers-reduced-motion: reduce) {
       body { animation: none; }
       .voltar svg { transition: none; }
+      .looks img { transition: none; }
       .js .looks li { transition: none; transform: none; }
     }
   </style>
