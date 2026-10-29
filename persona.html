@@ -1,1 +1,231 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OXIMORO | Persona</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300&display=block" rel="stylesheet">
+  <style>
+    :root {
+      --fundo: #f3f4f0;   /* cor enquanto a imagem carrega */
+      --texto: #000000;
+      --margem: clamp(1.5rem, 5vw, 4rem);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      background-color: var(--fundo);
+    }
+
+    /* o fundo fica numa camada fixa do tamanho da tela */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: url("imagens/FUNDOPERSONA.png") center / cover no-repeat;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      color: var(--texto);
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-weight: 300;
+      animation: entrar 0.5s ease;
+    }
+
+    @keyframes entrar {
+      from { opacity: 0; }
+    }
+
+    .so-leitor {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    /* seta para voltar ao menu */
+    .voltar {
+      position: absolute;
+      top: clamp(1rem, 3.5vh, 2.25rem);
+      left: calc(var(--margem) - 0.4rem);
+      z-index: 3;
+      display: inline-flex;
+      padding: 0.4rem;
+      color: var(--texto);
+    }
+
+    .voltar svg {
+      width: clamp(2rem, 3vw, 3rem);
+      height: auto;
+      transition: transform 0.2s ease;
+    }
+
+    .voltar:hover svg,
+    .voltar:focus-visible svg {
+      transform: translateX(-5px);
+    }
+
+    .voltar:focus-visible {
+      outline: 2px solid var(--texto);
+      outline-offset: 2px;
+    }
+
+    /* texto alinhado à esquerda, com no máximo 900 px de largura */
+    .texto {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(4rem, 12vh, 7rem) var(--margem) clamp(2rem, 6vh, 4rem);
+    }
+
+    .texto p {
+      width: min(100%, 900px);
+      font-size: clamp(1rem, 1.45vw, 1.35rem);
+      line-height: 1.55;
+      text-align: left;
+    }
+
+    .texto p + p {
+      margin-top: 1.3em;
+    }
+
+    /* cada palavra fica inteira na mesma linha */
+    .palavra {
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    /* as letras só somem quando o JavaScript está ativo */
+    .js .letra {
+      opacity: 0;
+      transition: opacity 0.12s linear;
+    }
+
+    .js .letra.on {
+      opacity: 1;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body { animation: none; }
+      .voltar svg { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <h1 class="so-leitor">Persona</h1>
+
+  <a class="voltar" href="menu.html" aria-label="Voltar ao menu">
+    <svg viewBox="0 0 48 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+      <path d="M47 12H2M12 2L2 12L12 22" vector-effect="non-scaling-stroke"/>
+    </svg>
+  </a>
+
+  <main class="texto" id="texto">
+    <p>Vivendo na vibração da cidade grande, entre o caos das ruas, o movimento acelerado das pessoas e a energia crua das cenas urbanas. Ela mistura luxo brutalista com brechós apertados, arte de rua com objetos antigos, humor com irreverência.</p>
+    <p>Seu estilo nasce da mistura: referências afro-diaspóricas e asiáticas, club culture, cultura pop e símbolos carregados de memória. Ela come na rua, ri alto, circula com amigos diversos e criativos, transforma qualquer espaço em palco.</p>
+    <p>Entre o improviso e o manifesto, constrói um lifestyle feito de excesso, autenticidade e afeto. Habita o limite entre arte e vida, sempre em movimento e sempre reinventando sua própria narrativa.</p>
+  </main>
+
+  <script>
+    (function () {
+      var MS_POR_LETRA = 24;      // velocidade da digitação
+      var PAUSA_VIRGULA = 120;    // pausa extra depois de vírgula (ms)
+      var PAUSA_PONTO = 350;      // pausa extra depois de ponto ou dois-pontos (ms)
+
+      // quem pediu menos movimento vê o texto completo de uma vez
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      var paragrafos = Array.prototype.slice.call(document.querySelectorAll("#texto p"));
+      var letras = [];
+
+      document.documentElement.classList.add("js");
+
+      // monta cada parágrafo palavra por palavra, letra por letra, sem mudar a quebra de linha final
+      paragrafos.forEach(function (p) {
+        var original = p.textContent.trim().replace(/\s+/g, " ").normalize("NFC");
+        p.textContent = "";
+
+        // cópia invisível do texto inteiro para leitores de tela
+        var leitor = document.createElement("span");
+        leitor.className = "so-leitor";
+        leitor.textContent = original;
+        p.appendChild(leitor);
+
+        var palavras = original.split(" ");
+        palavras.forEach(function (palavra, i) {
+          var caixa = document.createElement("span");
+          caixa.className = "palavra";
+          caixa.setAttribute("aria-hidden", "true");
+          Array.from(palavra).forEach(function (caractere) {
+            var letra = document.createElement("span");
+            letra.className = "letra";
+            letra.textContent = caractere;
+            caixa.appendChild(letra);
+            letras.push(letra);
+          });
+          p.appendChild(caixa);
+          if (i < palavras.length - 1) p.appendChild(document.createTextNode(" "));
+        });
+      });
+
+      // momento em que cada letra aparece (os parágrafos aparecem em sequência)
+      var t = 0;
+      var momentos = letras.map(function (letra) {
+        var agora = t;
+        var c = letra.textContent;
+        t += MS_POR_LETRA;
+        if (c === ",") t += PAUSA_VIRGULA;
+        else if (c === "." || c === ":") t += PAUSA_PONTO;
+        return agora;
+      });
+
+      var proxima = 0;
+
+      function mostrarTudo() {
+        for (; proxima < letras.length; proxima++) letras[proxima].classList.add("on");
+      }
+
+      function iniciar() {
+        var inicio = performance.now();
+
+        function quadro(agora) {
+          var decorrido = agora - inicio;
+          while (proxima < letras.length && momentos[proxima] <= decorrido) {
+            letras[proxima++].classList.add("on");
+          }
+          if (proxima < letras.length) requestAnimationFrame(quadro);
+        }
+
+        requestAnimationFrame(quadro);
+
+        // clique, toque ou tecla mostram o texto inteiro na hora
+        ["click", "touchstart", "keydown"].forEach(function (evento) {
+          window.addEventListener(evento, mostrarTudo, { once: true });
+        });
+      }
+
+      // espera a fonte carregar (no máximo 1,5 s) para o texto já aparecer na fonte certa
+      var fonte = (document.fonts && document.fonts.load)
+        ? document.fonts.load('300 1em "IBM Plex Mono"')
+        : Promise.resolve();
+      var limite = new Promise(function (resolve) { setTimeout(resolve, 1500); });
+      Promise.race([fonte, limite]).then(iniciar, iniciar);
+    })();
+  </script>
+</body>
+</html>
