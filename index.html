@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>OXIMORO</title>
+  <noscript><meta http-equiv="refresh" content="5;url=tema.html"></noscript>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik+Beastly&display=swap" rel="stylesheet">
   <style>
     :root {
       --fundo: #870c0c;
@@ -31,19 +32,112 @@
       align-items: center;
       justify-content: center;
       padding: 1rem;
+      overflow: hidden;
+      transition: opacity 0.5s ease;
+    }
+
+    body.saindo {
+      opacity: 0;
     }
 
     h1 {
-      font-family: "Fraunces", Georgia, "Times New Roman", serif;
-      font-weight: 900;
-      font-size: clamp(3rem, 17vw, 16rem);
+      padding: 0.3em 0.2em;
+      font-family: "Rubik Beastly", Impact, "Arial Black", sans-serif;
+      font-weight: 400;
+      font-size: clamp(2.5rem, 15vw, 14rem);
       line-height: 1;
-      letter-spacing: -0.02em;
       text-align: center;
     }
   </style>
 </head>
 <body>
   <h1>OXIMORO</h1>
+
+  <!--
+    Filtro das pontas:
+    1. "corpo" = a letra sem as partes finas (erode + dilate com o mesmo raio)
+    2. "pontas" = a letra menos o corpo, ou seja, só as pontas pontiagudas
+    3. as pontas são deslocadas com força, o corpo só treme de leve
+  -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <filter id="pontas" x="-10%" y="-25%" width="120%" height="150%" color-interpolation-filters="sRGB">
+      <feMorphology id="erosao" in="SourceGraphic" operator="erode" radius="4" result="erodido"/>
+      <feMorphology id="dilatacao" in="erodido" operator="dilate" radius="4" result="corpo"/>
+      <feComposite in="SourceGraphic" in2="corpo" operator="out" result="soPontas"/>
+      <feTurbulence id="ruido" type="fractalNoise" baseFrequency="0.03 0.04" numOctaves="2" seed="5" result="ruido"/>
+      <feDisplacementMap id="moverPontas" in="soPontas" in2="ruido" scale="0" xChannelSelector="R" yChannelSelector="G" result="pontasMov"/>
+      <feDisplacementMap id="moverCorpo" in="corpo" in2="ruido" scale="0" xChannelSelector="R" yChannelSelector="G" result="corpoMov"/>
+      <feMerge>
+        <feMergeNode in="corpoMov"/>
+        <feMergeNode in="pontasMov"/>
+      </feMerge>
+    </filter>
+  </svg>
+
+  <script>
+    (function () {
+      var DURACAO = 5000;     // tempo total até abrir a próxima página (ms)
+      var DESVANECER = 500;   // tempo do fade final (ms)
+      var DESTINO = "tema.html";
+
+      var titulo = document.querySelector("h1");
+      var erosao = document.getElementById("erosao");
+      var dilatacao = document.getElementById("dilatacao");
+      var ruido = document.getElementById("ruido");
+      var moverPontas = document.getElementById("moverPontas");
+      var moverCorpo = document.getElementById("moverCorpo");
+      var reduzirMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      function iniciar() {
+        var inicio = performance.now();
+
+        setTimeout(function () {
+          document.body.classList.add("saindo");
+        }, DURACAO - DESVANECER);
+
+        setTimeout(function () {
+          window.location.replace(DESTINO);
+        }, DURACAO);
+
+        if (reduzirMovimento) return;
+
+        var tamanho = parseFloat(getComputedStyle(titulo).fontSize);
+        titulo.style.filter = "url(#pontas)";
+
+        function quadro(agora) {
+          var t = agora - inicio;
+          if (t >= DURACAO) return;
+
+          var s = t / 1000;
+          // intensidade: sobe rápido, fica alta no meio e some no final
+          var e = Math.pow(Math.sin(Math.PI * (t / DURACAO)), 0.6);
+
+          // o raio define o que conta como "ponta": ao variar, as pontas crescem e encolhem
+          var raio = (tamanho * (0.035 + 0.012 * Math.sin(s * 2.6))).toFixed(2);
+          erosao.setAttribute("radius", raio);
+          dilatacao.setAttribute("radius", raio);
+
+          // o ruído muda de frequência o tempo todo, o que faz as pontas balançarem
+          var fx = 0.03 + 0.01 * Math.sin(s * 3.2) + 0.005 * Math.sin(s * 7.1);
+          var fy = 0.04 + 0.012 * Math.cos(s * 4.1) + 0.006 * Math.sin(s * 6.3);
+          ruido.setAttribute("baseFrequency", fx + " " + fy);
+
+          moverPontas.setAttribute("scale", tamanho * 0.1 * e);   // força nas pontas
+          moverCorpo.setAttribute("scale", tamanho * 0.02 * e);   // tremor leve no resto da letra
+
+          requestAnimationFrame(quadro);
+        }
+
+        requestAnimationFrame(quadro);
+      }
+
+      // espera a fonte carregar (no máximo 1,5 s) para a animação não começar com a fonte errada
+      var fonte = (document.fonts && document.fonts.load)
+        ? document.fonts.load('1em "Rubik Beastly"')
+        : Promise.resolve();
+      var limite = new Promise(function (resolve) { setTimeout(resolve, 1500); });
+      Promise.race([fonte, limite]).then(iniciar, iniciar);
+    })();
+  </script>
 </body>
 </html>
