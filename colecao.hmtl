@@ -1,1 +1,262 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OXIMORO | Coleção</title>
+  <style>
+    :root {
+      --fundo: #f3f4f0;   /* cor enquanto a imagem carrega */
+      --texto: #870c0c;
+      --margem: clamp(1.5rem, 5vw, 4rem);
+
+      /* quanto uma imagem cobre da vizinha (0 = lado a lado, 0.5 = metade). Pode ser negativo no CSS = espaço. */
+      --sobreposicao: 0.6;
+      /* proporção aproximada das imagens (largura / altura) */
+      --proporcao: 0.7;
+
+      /* altura única de todas as imagens: ocupa quase toda a tela, mas sempre cabe na largura */
+      --lateral: clamp(1rem, 2vw, 2rem);
+      --altura: min(
+        calc(100vh - 8rem),
+        calc((100vw - 2 * var(--lateral)) / (12 * var(--proporcao) - 11 * var(--proporcao) * var(--sobreposicao)))
+      );
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      background-color: var(--fundo);
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4.5rem var(--lateral) 2.5rem;
+      background: var(--fundo);
+      color: var(--texto);
+      animation: entrar 0.5s ease;
+    }
+
+    @keyframes entrar {
+      from { opacity: 0; }
+    }
+
+    .so-leitor {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    /* seta para voltar ao menu */
+    .voltar {
+      position: absolute;
+      top: clamp(1rem, 3.5vh, 2.25rem);
+      left: calc(var(--margem) - 0.4rem);
+      z-index: 100;
+      display: inline-flex;
+      padding: 0.4rem;
+      color: var(--texto);
+    }
+
+    .voltar svg {
+      width: clamp(2rem, 3vw, 3rem);
+      height: auto;
+      transition: transform 0.2s ease;
+    }
+
+    .voltar:hover svg,
+    .voltar:focus-visible svg {
+      transform: translateX(-5px);
+    }
+
+    .voltar:focus-visible {
+      outline: 2px solid var(--texto);
+      outline-offset: 2px;
+    }
+
+    /* fileira com as 12 imagens, todas com a mesma altura */
+    .looks {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center;
+      list-style: none;
+    }
+
+    .looks li {
+      position: relative;
+      flex: none;
+      line-height: 0;
+    }
+
+    .looks li + li {
+      margin-left: calc(var(--altura) * var(--proporcao) * var(--sobreposicao) * -1);
+    }
+
+    .looks img {
+      display: block;
+      height: var(--altura);
+      width: auto;
+      transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.4s ease, opacity 0.4s ease;
+    }
+
+    /* o passar do mouse traz a imagem para a frente e aumenta */
+    .looks li:hover {
+      z-index: 50;
+    }
+
+    /* a imagem sob o mouse cresce quase até a altura da tela (--zoom, --dx e --dy vêm do JavaScript) */
+    .looks li:hover img {
+      transform: translate(var(--dx, 0px), var(--dy, 0px)) scale(var(--zoom, 1.5));
+    }
+
+    /* EFEITO NAS OUTRAS IMAGENS: troque a classe do body entre "efeito-pb" e "efeito-blur" */
+    .efeito-pb .looks:hover li:not(:hover) img {
+      filter: grayscale(1);
+    }
+
+    .efeito-blur .looks:hover li:not(:hover) img {
+      filter: blur(6px);
+      opacity: 0.45;
+    }
+
+    /* as imagens só ficam escondidas quando o JavaScript está ativo */
+    .js .looks li {
+      opacity: 0;
+      transform: translateY(1.5rem);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .js .looks li.on {
+      opacity: 1;
+      transform: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body { animation: none; }
+      .voltar svg { transition: none; }
+      .looks img { transition: none; }
+      .js .looks li { transition: none; transform: none; }
+    }
+  </style>
+</head>
+<body class="efeito-pb">
+  <h1 class="so-leitor">Coleção</h1>
+
+  <a class="voltar" href="menu.html" aria-label="Voltar ao menu">
+    <svg viewBox="0 0 48 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+      <path d="M47 12H2M12 2L2 12L12 22" vector-effect="non-scaling-stroke"/>
+    </svg>
+  </a>
+
+  <main>
+    <ul class="looks" id="looks">
+      <li><img src="imagens/30.png" alt="Look 1"></li>
+      <li><img src="imagens/31.png" alt="Look 2"></li>
+      <li><img src="imagens/32.png" alt="Look 3"></li>
+      <li><img src="imagens/33.png" alt="Look 4"></li>
+      <li><img src="imagens/34.png" alt="Look 5"></li>
+      <li><img src="imagens/35.png" alt="Look 6"></li>
+      <li><img src="imagens/36.png" alt="Look 7"></li>
+      <li><img src="imagens/37.png" alt="Look 8"></li>
+      <li><img src="imagens/38.png" alt="Look 9"></li>
+      <li><img src="imagens/39.png" alt="Look 10"></li>
+      <li><img src="imagens/40.png" alt="Look 11"></li>
+      <li><img src="imagens/41.png" alt="Look 12"></li>
+    </ul>
+  </main>
+
+  <script>
+    // ao passar o mouse, calcula quanto a imagem cresce e o quanto precisa se deslocar para caber inteira na tela
+    (function () {
+      var FOLGA = 24;   // espaço mínimo até a borda da tela (px)
+
+      document.querySelectorAll("#looks li").forEach(function (li) {
+        li.addEventListener("mouseenter", function () {
+          var img = li.querySelector("img");
+          var caixa = li.getBoundingClientRect();
+          var vw = document.documentElement.clientWidth;
+          var vh = window.innerHeight;
+
+          var zoom = (vh - 2 * FOLGA) / caixa.height;
+          var largura = caixa.width * zoom;
+
+          // centraliza na vertical e mantém dentro da tela na horizontal
+          var cx = caixa.left + caixa.width / 2;
+          var esquerda = Math.max(FOLGA, Math.min(cx - largura / 2, vw - FOLGA - largura));
+          var dx = esquerda + largura / 2 - cx;
+          var dy = vh / 2 - (caixa.top + caixa.height / 2);
+
+          img.style.setProperty("--zoom", zoom.toFixed(3));
+          img.style.setProperty("--dx", dx.toFixed(1) + "px");
+          img.style.setProperty("--dy", dy.toFixed(1) + "px");
+        });
+      });
+    })();
+  </script>
+
+  <script>
+    (function () {
+      var INTERVALO = 380;   // tempo entre uma imagem e a próxima (ms)
+
+      var itens = Array.prototype.slice.call(document.querySelectorAll("#looks li"));
+
+      // quem pediu menos movimento vê tudo de uma vez
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      document.documentElement.classList.add("js");
+
+      // ordem aleatória (embaralhamento de Fisher-Yates)
+      var ordem = itens.slice();
+      for (var i = ordem.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = ordem[i]; ordem[i] = ordem[j]; ordem[j] = tmp;
+      }
+
+      var proxima = 0;
+      var timer = null;
+
+      function mostrarTudo() {
+        clearInterval(timer);
+        for (; proxima < ordem.length; proxima++) ordem[proxima].classList.add("on");
+      }
+
+      function iniciar() {
+        timer = setInterval(function () {
+          ordem[proxima++].classList.add("on");
+          if (proxima >= ordem.length) clearInterval(timer);
+        }, INTERVALO);
+
+        // clique, toque ou tecla mostram todas na hora
+        ["click", "touchstart", "keydown"].forEach(function (evento) {
+          window.addEventListener(evento, mostrarTudo, { once: true });
+        });
+      }
+
+      // espera as imagens carregarem (no máximo 4 s) para a animação não engasgar
+      var carregadas = itens.map(function (li) {
+        var img = li.querySelector("img");
+        return new Promise(function (resolve) {
+          if (img.complete) return resolve();
+          img.addEventListener("load", resolve, { once: true });
+          img.addEventListener("error", resolve, { once: true });
+        });
+      });
+      var limite = new Promise(function (resolve) { setTimeout(resolve, 4000); });
+      Promise.race([Promise.all(carregadas), limite]).then(iniciar);
+    })();
+  </script>
+</body>
+</html>
