@@ -1,1 +1,351 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OXIMORO | Moodboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300&display=block" rel="stylesheet">
+  <link rel="preload" as="image" href="imagens/mood.png">
+  <style>
+    :root {
+      --fundo: #f3f4f0;
+      --texto: #000000;
+      --seta: #f3f4f0;
+      --piscar: 0.6s;   /* duração de cada piscada do texto (uma piscada = aceso + apagado) */
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      background-color: var(--fundo);
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      color: var(--texto);
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-weight: 300;
+      animation: entrar 0.5s ease;
+    }
+
+    @keyframes entrar {
+      from { opacity: 0; }
+    }
+
+    /* aceso na primeira metade, apagado na segunda; a troca é seca, sem fade */
+    @keyframes piscar {
+      0%  { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .so-leitor {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    /* poema centralizado no meio da página */
+    .texto {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .texto[hidden] {
+      display: none;
+    }
+
+    .texto.piscando {
+      animation: piscar var(--piscar) steps(1, end) infinite;
+    }
+
+    .texto p {
+      font-size: clamp(1.05rem, 2.2vw + 0.3rem, 2.4rem);
+      line-height: 1.5;
+    }
+
+    .texto p + p {
+      margin-top: 1.6em;
+    }
+
+    .linha {
+      display: block;
+    }
+
+    /* cada palavra fica inteira na mesma linha */
+    .palavra {
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    /* as letras só somem quando o JavaScript está ativo */
+    .js .letra {
+      opacity: 0;
+      transition: opacity 0.12s linear;
+    }
+
+    .js .letra.on {
+      opacity: 1;
+    }
+
+    /* imagem em tela inteira */
+    .mood {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .mood.visivel {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* entra piscando: 3 piscadas de 0,5 s (1,5 s) e depois fica estática */
+    .mood.piscando {
+      animation: piscar 0.5s steps(1, end) 3;
+    }
+
+    /* telas em pé: mostra a imagem inteira em vez de cortar as laterais */
+    @media (max-aspect-ratio: 1/1) {
+      .mood { object-fit: contain; }
+    }
+
+    /* seta para voltar: só aparece junto com a imagem */
+    .voltar {
+      position: fixed;
+      top: clamp(1rem, 3.5vh, 2.25rem);
+      left: clamp(1rem, 3vw, 2.5rem);
+      z-index: 10;
+      display: inline-flex;
+      padding: 0.4rem;
+      color: var(--seta);
+      filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.6s ease;
+    }
+
+    .voltar.aparece {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .voltar svg {
+      width: clamp(2rem, 3vw, 3rem);
+      height: auto;
+      transition: transform 0.2s ease;
+    }
+
+    .voltar:hover svg,
+    .voltar:focus-visible svg {
+      transform: translateX(-5px);
+    }
+
+    .voltar:focus-visible {
+      outline: 2px solid var(--seta);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body { animation: none; }
+      .voltar,
+      .voltar svg { transition: none; }
+    }
+  </style>
+  <!-- sem JavaScript: mostra direto a imagem e a seta -->
+  <noscript>
+    <style>
+      .texto { display: none; }
+      .mood { opacity: 1; visibility: visible; }
+      .voltar { opacity: 1; visibility: visible; }
+    </style>
+  </noscript>
+</head>
+<body>
+  <h1 class="so-leitor">Moodboard</h1>
+
+  <main class="texto" id="texto">
+    <p>
+      <span class="linha">Através de espinhos e espirais,</span>
+      <span class="linha">a pele encontra a pedra.</span>
+    </p>
+    <p>
+      <span class="linha">O vermelho pulsa</span>
+      <span class="linha">seiva, deserto, ferida viva.</span>
+    </p>
+    <p>
+      <span class="linha">Entre contrastes e encantos,</span>
+      <span class="linha">OXIMORO respira em mito, matéria e memória.</span>
+    </p>
+  </main>
+
+  <img class="mood" src="imagens/mood.png" alt="Moodboard OXIMORO">
+
+  <a class="voltar" href="menu.html" aria-label="Voltar ao menu">
+    <svg viewBox="0 0 48 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+      <path d="M47 12H2M12 2L2 12L12 22" vector-effect="non-scaling-stroke"/>
+    </svg>
+  </a>
+
+  <script>
+    (function () {
+      var MS_POR_LETRA = 24;            // velocidade da digitação
+      var PAUSA_VIRGULA = 120;          // pausa extra depois de vírgula (ms)
+      var PAUSA_PONTO = 350;            // pausa extra depois de ponto (ms)
+      var PAUSA_LINHA = 200;            // pausa extra no fim de cada verso (ms)
+      var PISCAR_TEXTO = 3000;          // quanto tempo o texto pisca depois de digitado (ms)
+      var ESPERA_SEM_ANIMACAO = 8000;   // quem pediu menos movimento lê o texto parado por este tempo (ms)
+
+      var reduzir = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var texto = document.getElementById("texto");
+      var imagem = document.querySelector(".mood");
+      var voltar = document.querySelector(".voltar");
+
+      // se a imagem não existir, ela some em vez de mostrar o ícone quebrado
+      imagem.addEventListener("error", function () { imagem.style.display = "none"; });
+
+      // começa a carregar e decodificar a imagem já, para ela estar pronta na hora da troca
+      var pronta = imagem.decode ? imagem.decode().catch(function () {}) : Promise.resolve();
+
+      var trocou = false;
+      function trocarPelaImagem() {
+        if (trocou) return;
+        trocou = true;
+        var limite = new Promise(function (resolve) { setTimeout(resolve, 3000); });
+        Promise.race([pronta, limite]).then(function () {
+          texto.classList.remove("piscando");
+          texto.hidden = true;
+          imagem.classList.add("visivel");
+          if (!reduzir) imagem.classList.add("piscando");   // a imagem entra piscando (ver CSS) e depois fica parada
+          voltar.classList.add("aparece");
+        });
+      }
+
+      var eventosDePular = ["click", "touchstart", "keydown"];
+
+      // menos movimento: texto parado, depois a imagem sem piscar; clique, toque ou tecla antecipam
+      if (reduzir) {
+        var espera = setTimeout(trocarPelaImagem, ESPERA_SEM_ANIMACAO);
+        eventosDePular.forEach(function (evento) {
+          window.addEventListener(evento, function () {
+            clearTimeout(espera);
+            trocarPelaImagem();
+          }, { once: true });
+        });
+        return;
+      }
+
+      document.documentElement.classList.add("js");
+
+      // monta cada verso palavra por palavra, letra por letra, sem mudar a quebra de linha final
+      var linhas = Array.prototype.slice.call(texto.querySelectorAll(".linha"));
+      var letras = [];
+
+      linhas.forEach(function (linha) {
+        var original = linha.textContent.trim().replace(/\s+/g, " ").normalize("NFC");
+        linha.textContent = "";
+
+        // cópia invisível do verso inteiro para leitores de tela
+        var leitor = document.createElement("span");
+        leitor.className = "so-leitor";
+        leitor.textContent = original;
+        linha.appendChild(leitor);
+
+        var palavras = original.split(" ");
+        palavras.forEach(function (palavra, i) {
+          var caixa = document.createElement("span");
+          caixa.className = "palavra";
+          caixa.setAttribute("aria-hidden", "true");
+          Array.from(palavra).forEach(function (caractere) {
+            var letra = document.createElement("span");
+            letra.className = "letra";
+            letra.textContent = caractere;
+            caixa.appendChild(letra);
+            letras.push(letra);
+          });
+          linha.appendChild(caixa);
+          if (i < palavras.length - 1) linha.appendChild(document.createTextNode(" "));
+        });
+
+        letras[letras.length - 1].dataset.fim = "1";   // última letra do verso
+      });
+
+      // momento em que cada letra aparece
+      var t = 0;
+      var momentos = letras.map(function (letra) {
+        var agora = t;
+        var c = letra.textContent;
+        t += MS_POR_LETRA;
+        if (c === ",") t += PAUSA_VIRGULA;
+        else if (c === ".") t += PAUSA_PONTO;
+        if (letra.dataset.fim) t += PAUSA_LINHA;
+        return agora;
+      });
+
+      var proxima = 0;
+      var digitado = false;
+
+      // texto completo: começa a piscar e, depois de uns 3 s, dá lugar à imagem
+      function fimDaDigitacao() {
+        if (digitado) return;
+        digitado = true;
+        texto.classList.add("piscando");
+        setTimeout(trocarPelaImagem, PISCAR_TEXTO);
+      }
+
+      function mostrarTudo() {
+        for (; proxima < letras.length; proxima++) letras[proxima].classList.add("on");
+        fimDaDigitacao();
+      }
+
+      function iniciar() {
+        var inicio = performance.now();
+
+        function quadro(agora) {
+          var decorrido = agora - inicio;
+          while (proxima < letras.length && momentos[proxima] <= decorrido) {
+            letras[proxima++].classList.add("on");
+          }
+          if (proxima < letras.length) requestAnimationFrame(quadro);
+          else fimDaDigitacao();
+        }
+
+        requestAnimationFrame(quadro);
+
+        // clique, toque ou tecla mostram o texto inteiro na hora
+        eventosDePular.forEach(function (evento) {
+          window.addEventListener(evento, mostrarTudo, { once: true });
+        });
+      }
+
+      // espera a fonte carregar (no máximo 1,5 s) para o texto já aparecer na fonte certa
+      var fonte = (document.fonts && document.fonts.load)
+        ? document.fonts.load('300 1em "IBM Plex Mono"')
+        : Promise.resolve();
+      var limiteFonte = new Promise(function (resolve) { setTimeout(resolve, 1500); });
+      Promise.race([fonte, limiteFonte]).then(iniciar, iniciar);
+    })();
+  </script>
+</body>
+</html>
