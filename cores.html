@@ -1,1 +1,357 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OXIMORO | Cores</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@200;300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --fundo: #f3f4f0;       /* cor enquanto a imagem carrega */
+      --vermelho: #870c0c;
+      --respiro: clamp(0.25rem, 0.8vh, 0.6rem);   /* espaço entre uma harmonia e outra */
+
+      /* O conteúdo ocupa só os 2/3 da esquerda do fundocores.png. A imagem preenche a tela (cover),
+         ancorada à esquerda, então 2/3 da imagem = 66,67% da largura ou, em telas mais "altas",
+         2/3 de (altura x 16/9). Em telas estreitas isso passa a ser a largura toda. */
+      --area: min(100vw, max(66.67vw, 118.52vh));
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      background-color: var(--fundo);
+    }
+
+    /* o fundo fica numa camada fixa do tamanho da tela */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: url("imagens/fundocores.png") left center / cover no-repeat;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      animation: entrar 0.5s ease;
+    }
+
+    @keyframes entrar {
+      from { opacity: 0; }
+    }
+
+    .so-leitor {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .conteudo {
+      width: var(--area);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.75rem, 2vh, 1.5rem);
+      padding: clamp(1rem, 3vh, 2rem) clamp(1rem, 3vw, 2.5rem);
+    }
+
+    /* menu do topo: seta, CORES e HARMONIAS */
+    .topo {
+      display: flex;
+      align-items: center;
+      gap: clamp(1rem, 3vw, 2.5rem);
+      color: var(--vermelho);
+    }
+
+    .voltar {
+      display: inline-flex;
+      padding: 0.4rem;
+      color: var(--vermelho);
+    }
+
+    .voltar svg {
+      width: clamp(2rem, 3vw, 3rem);
+      height: auto;
+      transition: transform 0.2s ease;
+    }
+
+    .voltar:hover svg,
+    .voltar:focus-visible svg {
+      transform: translateX(-5px);
+    }
+
+    .abas {
+      display: flex;
+      align-items: center;
+      gap: clamp(1rem, 3vw, 2.5rem);
+    }
+
+    .abas button {
+      padding: 0.1em 0;
+      border: 0;
+      background: none;
+      color: var(--vermelho);
+      font: inherit;
+      font-weight: 200;
+      font-size: clamp(1.5rem, 3.2vw, 3rem);
+      line-height: 1;
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+    }
+
+    /* o ativo fica inteiro, o outro fica com opacidade baixa */
+    .abas button[aria-pressed="true"] {
+      opacity: 1;
+    }
+
+    .abas button[aria-pressed="false"] {
+      opacity: 0.3;
+    }
+
+    .abas button[aria-pressed="false"]:hover {
+      opacity: 0.6;
+    }
+
+    .voltar:focus-visible,
+    .abas button:focus-visible {
+      outline: 2px solid var(--vermelho);
+      outline-offset: 4px;
+    }
+
+    /* 8 faixas empilhadas; cada faixa tem até 3 células lado a lado */
+    .faixas {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      row-gap: 0;
+      transition: row-gap 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    /* em HARMONIAS, um espaço fino separa cada harmonia da seguinte */
+    .faixas.harmonias {
+      row-gap: var(--respiro);
+    }
+
+    .faixa {
+      flex: 1 1 0;
+      min-height: 2.75rem;
+      display: flex;
+    }
+
+    .cor {
+      flex: 0 0 0%;          /* fechada: largura zero */
+      min-width: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      font-weight: 300;
+      transition:
+        flex-grow 0.8s cubic-bezier(0.65, 0, 0.35, 1),
+        background-color 0.8s ease,
+        color 0.8s ease;
+    }
+
+    .cor.aberta {
+      flex-grow: 1;
+    }
+
+    .cor.sem-transicao {
+      transition: none !important;
+    }
+
+    .nome {
+      margin-left: clamp(0.6rem, 1.2vw, 1.1rem);
+      font-size: clamp(0.62rem, 1.15vw, 1rem);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      transition: opacity 0.3s ease;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body { animation: none; }
+      .faixas,
+      .cor,
+      .nome,
+      .voltar svg,
+      .abas button { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <h1 class="so-leitor">Cores</h1>
+
+  <div class="conteudo">
+    <header class="topo">
+      <a class="voltar" href="menu.html" aria-label="Voltar ao menu">
+        <svg viewBox="0 0 48 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M47 12H2M12 2L2 12L12 22" vector-effect="non-scaling-stroke"/>
+        </svg>
+      </a>
+      <nav class="abas" aria-label="Modo de visualização">
+        <button type="button" data-modo="cores" aria-pressed="true">CORES</button>
+        <button type="button" data-modo="harmonias" aria-pressed="false">HARMONIAS</button>
+      </nav>
+    </header>
+
+    <main class="faixas" id="faixas">
+      <div class="faixa"><div class="cor aberta" data-nome="REFLEXO" data-cor="#8C8C87" style="background-color:#8C8C87;color:#000000"><span class="nome">REFLEXO</span></div></div>
+      <div class="faixa"><div class="cor aberta" data-nome="REDEFINIÇÃO" data-cor="#FCFFFF" style="background-color:#FCFFFF;color:#000000"><span class="nome">REDEFINIÇÃO</span></div></div>
+      <div class="faixa"><div class="cor aberta" data-nome="ÁPICE" data-cor="#0D0D0D" style="background-color:#0D0D0D;color:#f3f4f0"><span class="nome">ÁPICE</span></div></div>
+      <div class="faixa"><div class="cor aberta" data-nome="FOGO" data-cor="#590202" style="background-color:#590202;color:#f3f4f0"><span class="nome">FOGO</span></div></div>
+      <div class="faixa"><div class="cor aberta" data-nome="RAÍZES" data-cor="#403E29" style="background-color:#403E29;color:#f3f4f0"><span class="nome">RAÍZES</span></div></div>
+      <div class="faixa"><div class="cor aberta" data-nome="DICKE" data-cor="#D93611" style="background-color:#D93611;color:#000000"><span class="nome">DICKE</span></div></div>
+      <div class="faixa"><div class="cor aberta" data-nome="AUDÁCIA" data-cor="#A61414" style="background-color:#A61414;color:#f3f4f0"><span class="nome">AUDÁCIA</span></div></div>
+      <div class="faixa"><div class="cor aberta" data-nome="JORNADA" data-cor="#1B3240" style="background-color:#1B3240;color:#f3f4f0"><span class="nome">JORNADA</span></div></div>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      var CLARO = "#f3f4f0";
+      var ESCURO = "#000000";
+
+      // Harmonias: cada linha é uma faixa dividida em 2 ou 3 cores.
+      // Os nomes e as cores de cada um vêm do HTML (modo CORES).
+      var HARMONIAS = [
+        ["REFLEXO", "REDEFINIÇÃO", "ÁPICE"],
+        ["FOGO", "RAÍZES", "AUDÁCIA"],
+        ["JORNADA", "AUDÁCIA", "ÁPICE"],
+        ["REFLEXO", "REDEFINIÇÃO", "FOGO"],
+        ["JORNADA", "AUDÁCIA"],
+        ["REDEFINIÇÃO", "FOGO"],
+        ["REFLEXO", "REDEFINIÇÃO"],
+        ["ÁPICE", "FOGO"]
+      ];
+
+      var reduzir = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var container = document.getElementById("faixas");
+      var faixas = Array.prototype.slice.call(document.querySelectorAll(".faixa"));
+      var botoes = Array.prototype.slice.call(document.querySelectorAll(".abas button"));
+
+      // lê nome e cor de cada retângulo do HTML
+      var mapa = {};
+      var MODOS = { cores: [], harmonias: HARMONIAS };
+      faixas.forEach(function (faixa) {
+        var celula = faixa.querySelector(".cor");
+        mapa[celula.dataset.nome] = celula.dataset.cor;
+        MODOS.cores.push([celula.dataset.nome]);
+      });
+
+      // cada faixa ganha mais duas células, que começam fechadas
+      faixas.forEach(function (faixa) {
+        for (var k = 0; k < 2; k++) {
+          var celula = document.createElement("div");
+          celula.className = "cor";
+          var rotulo = document.createElement("span");
+          rotulo.className = "nome";
+          celula.appendChild(rotulo);
+          faixa.appendChild(celula);
+        }
+      });
+
+      // cor do texto com mais contraste sobre o retângulo
+      function luminancia(hex) {
+        var n = parseInt(hex.slice(1), 16);
+        var canais = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(function (v) {
+          v /= 255;
+          return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+        });
+        return 0.2126 * canais[0] + 0.7152 * canais[1] + 0.0722 * canais[2];
+      }
+
+      function corDoTexto(hex) {
+        var l = luminancia(hex);
+        var contrasteClaro = (luminancia(CLARO) + 0.05) / (l + 0.05);
+        var contrasteEscuro = (l + 0.05) / 0.05;
+        return contrasteClaro >= contrasteEscuro ? CLARO : ESCURO;
+      }
+
+      function definirRotulo(celula, nome, animar) {
+        var rotulo = celula.querySelector(".nome");
+        rotulo.dataset.alvo = nome;
+        if (rotulo.textContent === nome) {
+          rotulo.style.opacity = 1;
+          return;
+        }
+        if (!animar || reduzir) {
+          rotulo.textContent = nome;
+          rotulo.style.opacity = 1;
+          return;
+        }
+        rotulo.style.opacity = 0;
+        setTimeout(function () {
+          rotulo.textContent = rotulo.dataset.alvo;
+          rotulo.style.opacity = 1;
+        }, 300);
+      }
+
+      function aplicar(modo) {
+        var linhas = MODOS[modo];
+        faixas.forEach(function (faixa, r) {
+          var celulas = faixa.children;
+          for (var k = 0; k < celulas.length; k++) {
+            var celula = celulas[k];
+            var nome = linhas[r][k];
+
+            if (!nome) {
+              // some encolhendo; mantém cor e nome até fechar
+              celula.classList.remove("aberta");
+              continue;
+            }
+
+            var cor = mapa[nome];
+            var estavaFechada = !celula.classList.contains("aberta");
+
+            if (estavaFechada) {
+              // define cor e nome sem animar (ainda com largura zero) e só depois abre
+              celula.classList.add("sem-transicao");
+              celula.style.backgroundColor = cor;
+              celula.style.color = corDoTexto(cor);
+              definirRotulo(celula, nome, false);
+              void celula.offsetWidth;
+              celula.classList.remove("sem-transicao");
+            } else {
+              celula.style.backgroundColor = cor;
+              celula.style.color = corDoTexto(cor);
+              definirRotulo(celula, nome, true);
+            }
+
+            celula.dataset.nome = nome;
+            celula.classList.add("aberta");
+          }
+        });
+      }
+
+      var atual = "cores";
+
+      function definirModo(modo) {
+        if (modo === atual) return;
+        atual = modo;
+        container.classList.toggle("harmonias", modo === "harmonias");
+        botoes.forEach(function (botao) {
+          botao.setAttribute("aria-pressed", botao.dataset.modo === modo ? "true" : "false");
+        });
+        aplicar(modo);
+      }
+
+      botoes.forEach(function (botao) {
+        botao.addEventListener("click", function () { definirModo(botao.dataset.modo); });
+      });
+    })();
+  </script>
+</body>
+</html>
