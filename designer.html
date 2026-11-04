@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -75,8 +74,10 @@
     }
 
     .texto p {
-      width: min(100%, 560px);
+      /* --recuo empurra o parágrafo até o "O" de MOHAMED (calculado pelo JavaScript) */
+      width: min(calc(100% - var(--recuo, 0px)), 560px);
       margin-top: 1.5rem;
+      margin-left: var(--recuo, 0px);
       font-size: clamp(1rem, 1.45vw, 1.35rem);
       line-height: 1.55;
       text-align: left;
@@ -125,6 +126,11 @@
       .texto {
         justify-content: flex-start;
       }
+
+      .texto p {
+        margin-left: 0;
+        width: 100%;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -143,8 +149,29 @@
   <img class="foto" src="imagens/fatima.gif" alt="Fatima Mohamed">
 
   <main class="texto">
-    <h1>Fatima Mohamed</h1>
+    <h1>Fatima M<span id="o-mohamed">o</span>hamed</h1>
     <p>Formada em Design de Moda, o trabalho parte de pesquisas em arte contemporânea, arquitetura brutalista e movimentos de vanguarda para construir peças que não se resumem a tendências.</p>
   </main>
+
+  <script>
+    // alinha o início do parágrafo ao "O" de MOHAMED
+    (function () {
+      var titulo = document.querySelector(".texto h1");
+      var marca = document.getElementById("o-mohamed");
+      var paragrafo = document.querySelector(".texto p");
+
+      function alinhar() {
+        var celular = window.matchMedia("(max-width: 700px)").matches;
+        var recuo = celular ? 0 : marca.getBoundingClientRect().left - titulo.getBoundingClientRect().left;
+        paragrafo.style.setProperty("--recuo", Math.max(0, recuo).toFixed(1) + "px");
+      }
+
+      alinhar();
+      window.addEventListener("resize", alinhar);
+      // recalcula quando a fonte do título termina de carregar
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(alinhar);
+      window.addEventListener("load", alinhar);
+    })();
+  </script>
 </body>
 </html>
