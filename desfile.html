@@ -1,1 +1,121 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OXIMORO | Desfile</title>
+  <style>
+    :root {
+      --fundo: #000000;   /* cor enquanto o gif carrega */
+      --branco: #ffffff;
+      --margem: clamp(1.5rem, 5vw, 4rem);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      background-color: var(--fundo);
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      animation: entrar 0.5s ease;
+    }
+
+    @keyframes entrar {
+      from { opacity: 0; }
+    }
+
+    .so-leitor {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    /* gif passando no fundo, ocupando 100% da tela */
+    .fundo {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: var(--fundo) url("imagens/vinhe.gif") center / cover no-repeat;
+    }
+
+    /* imagem central ocupando 90% da tela, sem distorcer */
+    .desfile {
+      position: relative;
+      z-index: 1;
+      display: block;
+      width: 90vw;
+      height: 90vh;
+      object-fit: contain;
+    }
+
+    @supports (height: 100dvh) {
+      .desfile {
+        height: 90dvh;
+      }
+    }
+
+    /* seta branca para voltar ao menu */
+    .voltar {
+      position: absolute;
+      top: clamp(1rem, 3.5vh, 2.25rem);
+      left: calc(var(--margem) - 0.4rem);
+      z-index: 3;
+      display: inline-flex;
+      padding: 0.4rem;
+      color: var(--branco);
+      filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.45));
+    }
+
+    .voltar svg {
+      width: clamp(2rem, 3vw, 3rem);
+      height: auto;
+      transition: transform 0.2s ease;
+    }
+
+    .voltar:hover svg,
+    .voltar:focus-visible svg {
+      transform: translateX(-5px);
+    }
+
+    .voltar:focus-visible {
+      outline: 2px solid var(--branco);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body { animation: none; }
+      .voltar svg { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <h1 class="so-leitor">Desfile</h1>
+
+  <div class="fundo" aria-hidden="true"></div>
+
+  <a class="voltar" href="menu.html" aria-label="Voltar ao menu">
+    <svg viewBox="0 0 48 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+      <path d="M47 12H2M12 2L2 12L12 22" vector-effect="non-scaling-stroke"/>
+    </svg>
+  </a>
+
+  <main>
+    <img class="desfile" src="imagens/desf.png" alt="Desfile">
+  </main>
+</body>
+</html>
