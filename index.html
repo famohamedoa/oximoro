@@ -57,7 +57,7 @@
     Filtro das pontas:
     1. "corpo" = a letra sem as partes finas (erode + dilate com o mesmo raio)
     2. "pontas" = a letra menos o corpo, ou seja, só as pontas pontiagudas
-    3. as pontas são deslocadas com força, o corpo só treme de leve
+    3. as pontas ondulam de leve, o corpo quase não se mexe
   -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
     <filter id="pontas" x="-10%" y="-25%" width="120%" height="150%" color-interpolation-filters="sRGB">
@@ -79,6 +79,10 @@
       var DURACAO = 5000;     // tempo total até abrir a próxima página (ms)
       var DESVANECER = 500;   // tempo do fade final (ms)
       var DESTINO = "tema.html";
+
+      // intensidade da animação das pontas (aumente para mais movimento, diminua para menos)
+      var FORCA_PONTAS = 0.035;
+      var FORCA_CORPO = 0.004;
 
       var titulo = document.querySelector("h1");
       var erosao = document.getElementById("erosao");
@@ -109,21 +113,21 @@
           if (t >= DURACAO) return;
 
           var s = t / 1000;
-          // intensidade: sobe rápido, fica alta no meio e some no final
+          // intensidade: sobe, fica no meio e some no final
           var e = Math.pow(Math.sin(Math.PI * (t / DURACAO)), 0.6);
 
-          // o raio define o que conta como "ponta": ao variar, as pontas crescem e encolhem
-          var raio = (tamanho * (0.035 + 0.012 * Math.sin(s * 2.6))).toFixed(2);
+          // o raio define o que conta como "ponta": variação pequena, as pontas só "respiram"
+          var raio = (tamanho * (0.035 + 0.008 * Math.sin(s * 1.8))).toFixed(2);
           erosao.setAttribute("radius", raio);
           dilatacao.setAttribute("radius", raio);
 
-          // o ruído muda de frequência o tempo todo, o que faz as pontas balançarem
-          var fx = 0.03 + 0.01 * Math.sin(s * 3.2) + 0.005 * Math.sin(s * 7.1);
-          var fy = 0.04 + 0.012 * Math.cos(s * 4.1) + 0.006 * Math.sin(s * 6.3);
+          // o ruído muda devagar, para as pontas ondularem em vez de tremerem
+          var fx = 0.03 + 0.006 * Math.sin(s * 1.9) + 0.003 * Math.sin(s * 4.3);
+          var fy = 0.04 + 0.008 * Math.cos(s * 2.4) + 0.004 * Math.sin(s * 3.8);
           ruido.setAttribute("baseFrequency", fx + " " + fy);
 
-          moverPontas.setAttribute("scale", tamanho * 0.1 * e);   // força nas pontas
-          moverCorpo.setAttribute("scale", tamanho * 0.02 * e);   // tremor leve no resto da letra
+          moverPontas.setAttribute("scale", tamanho * FORCA_PONTAS * e);   // força nas pontas
+          moverCorpo.setAttribute("scale", tamanho * FORCA_CORPO * e);     // quase nenhum tremor no resto da letra
 
           requestAnimationFrame(quadro);
         }
