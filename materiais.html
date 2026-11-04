@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300&display=swap" rel="stylesheet">
+  <script>document.documentElement.classList.add("js");</script>
   <style>
     :root {
       --fundo: #f3f4f0;
@@ -105,6 +106,16 @@
       aspect-ratio: 1.1544;
     }
 
+    /* a montagem só aparece depois que as imagens foram recortadas (se o JavaScript estiver ativo) */
+    .js .palco {
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .js .palco.pronto {
+      opacity: 1;
+    }
+
     .item {
       position: absolute;
       left: var(--x);
@@ -171,7 +182,8 @@
       .voltar svg,
       .item,
       .item img,
-      .nome { transition: none; }
+      .nome,
+      .js .palco { transition: none; }
     }
   </style>
 </head>
@@ -226,6 +238,81 @@
 
     <p class="nome" id="nome" aria-live="polite"></p>
   </main>
+
+  <script>
+    // recorta automaticamente o espaço transparente em volta de cada imagem
+    (function () {
+      var palco = document.getElementById("palco");
+      var imagens = Array.prototype.slice.call(palco.querySelectorAll("img"));
+      var ALFA = 10;       // pixels com opacidade acima disso contam como "imagem"
+      var MINIMO = 3;      // linhas/colunas com menos pixels que isso são ignoradas (poeira, pontinhos soltos)
+      var MAX_ANALISE = 500;   // tamanho usado só para medir
+      var MAX_FINAL = 1400;    // maior lado da imagem recortada
+
+      function recortar(img) {
+        return new Promise(function (resolve) {
+          function fazer() {
+            try {
+              var w = img.naturalWidth, h = img.naturalHeight;
+              if (!w || !h) return resolve();
+
+              var esc = Math.min(1, MAX_ANALISE / Math.max(w, h));
+              var cw = Math.max(1, Math.round(w * esc));
+              var ch = Math.max(1, Math.round(h * esc));
+              var c = document.createElement("canvas");
+              c.width = cw; c.height = ch;
+              var ctx = c.getContext("2d", { willReadFrequently: true });
+              ctx.drawImage(img, 0, 0, cw, ch);
+              var d = ctx.getImageData(0, 0, cw, ch).data;
+
+              var linhas = new Array(ch).fill(0), colunas = new Array(cw).fill(0);
+              for (var y = 0; y < ch; y++) {
+                for (var x = 0; x < cw; x++) {
+                  if (d[(y * cw + x) * 4 + 3] > ALFA) { linhas[y]++; colunas[x]++; }
+                }
+              }
+              function primeiro(v) { for (var i = 0; i < v.length; i++) if (v[i] >= MINIMO) return i; return -1; }
+              function ultimo(v) { for (var i = v.length - 1; i >= 0; i--) if (v[i] >= MINIMO) return i; return -1; }
+              var x0 = primeiro(colunas), x1 = ultimo(colunas), y0 = primeiro(linhas), y1 = ultimo(linhas);
+              if (x0 < 0 || y0 < 0) return resolve();
+
+              // volta para as medidas originais, com 1 px de folga
+              var m = Math.ceil(1 / esc);
+              var sx = Math.max(0, Math.floor(x0 / esc) - m);
+              var sy = Math.max(0, Math.floor(y0 / esc) - m);
+              var sw = Math.min(w, Math.ceil((x1 + 1) / esc) + m) - sx;
+              var sh = Math.min(h, Math.ceil((y1 + 1) / esc) + m) - sy;
+              if (sw >= w - 2 && sh >= h - 2) return resolve();   // não há nada para cortar
+
+              var k = Math.min(1, MAX_FINAL / Math.max(sw, sh));
+              var saida = document.createElement("canvas");
+              saida.width = Math.max(1, Math.round(sw * k));
+              saida.height = Math.max(1, Math.round(sh * k));
+              saida.getContext("2d").drawImage(img, sx, sy, sw, sh, 0, 0, saida.width, saida.height);
+              saida.toBlob(function (blob) {
+                if (!blob) return resolve();
+                img.onload = img.onerror = function () { resolve(); };
+                img.src = URL.createObjectURL(blob);
+              }, "image/png");
+            } catch (e) {
+              resolve();   // sem permissão para ler a imagem: mantém a original
+            }
+          }
+
+          if (img.complete && img.naturalWidth) fazer();
+          else {
+            img.addEventListener("load", fazer, { once: true });
+            img.addEventListener("error", function () { resolve(); }, { once: true });
+          }
+        });
+      }
+
+      var limite = new Promise(function (resolve) { setTimeout(resolve, 5000); });
+      Promise.race([Promise.all(imagens.map(recortar)), limite]).then(function () {
+        palco.classList.add("pronto");
+      });
+    })();
+  </script>
 
   <script>
     // calcula o tamanho da montagem para ocupar quase toda a tela e posiciona cada imagem em px
