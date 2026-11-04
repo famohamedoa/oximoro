@@ -40,7 +40,7 @@
       opacity: 0;
     }
 
-    h1 {
+    .titulo {
       padding: 0.3em 0.2em;
       font-family: "Rubik Beastly", Impact, "Arial Black", sans-serif;
       font-weight: 400;
@@ -48,31 +48,27 @@
       line-height: 1;
       text-align: center;
     }
+
+    /* camada com as cores invertidas, cobrindo a tela toda e recortada pela faixa que passa */
+    .invertido {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: var(--texto);
+      color: var(--fundo);
+      pointer-events: none;
+      clip-path: inset(0 100% 0 0);   /* começa totalmente escondida */
+    }
   </style>
 </head>
 <body>
-  <h1>OXIMORO</h1>
-
-  <!--
-    Filtro das pontas:
-    1. "corpo" = a letra sem as partes finas (erode + dilate com o mesmo raio)
-    2. "pontas" = a letra menos o corpo, ou seja, só as pontas pontiagudas
-    3. as pontas ondulam de leve, o corpo quase não se mexe
-  -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-    <filter id="pontas" x="-10%" y="-25%" width="120%" height="150%" color-interpolation-filters="sRGB">
-      <feMorphology id="erosao" in="SourceGraphic" operator="erode" radius="4" result="erodido"/>
-      <feMorphology id="dilatacao" in="erodido" operator="dilate" radius="4" result="corpo"/>
-      <feComposite in="SourceGraphic" in2="corpo" operator="out" result="soPontas"/>
-      <feTurbulence id="ruido" type="fractalNoise" baseFrequency="0.03 0.04" numOctaves="2" seed="5" result="ruido"/>
-      <feDisplacementMap id="moverPontas" in="soPontas" in2="ruido" scale="0" xChannelSelector="R" yChannelSelector="G" result="pontasMov"/>
-      <feDisplacementMap id="moverCorpo" in="corpo" in2="ruido" scale="0" xChannelSelector="R" yChannelSelector="G" result="corpoMov"/>
-      <feMerge>
-        <feMergeNode in="corpoMov"/>
-        <feMergeNode in="pontasMov"/>
-      </feMerge>
-    </filter>
-  </svg>
+  <h1 class="titulo">OXIMORO</h1>
+  <div class="invertido" id="invertido" aria-hidden="true">
+    <div class="titulo">OXIMORO</div>
+  </div>
 
   <script>
     (function () {
@@ -80,17 +76,18 @@
       var DESVANECER = 500;   // tempo do fade final (ms)
       var DESTINO = "tema.html";
 
-      // intensidade da animação das pontas (aumente para mais movimento, diminua para menos)
-      var FORCA_PONTAS = 0.035;
-      var FORCA_CORPO = 0.004;
+      var LARGURA_FAIXA = 0.24;   // largura da faixa, em fração da largura da tela
+      // momentos da animação, em fração da duração total: pausa, ida, volta (depois fica parado nas cores originais)
+      var INICIO_IDA = 0.12, FIM_IDA = 0.50, FIM_VOLTA = 0.88;
 
-      var titulo = document.querySelector("h1");
-      var erosao = document.getElementById("erosao");
-      var dilatacao = document.getElementById("dilatacao");
-      var ruido = document.getElementById("ruido");
-      var moverPontas = document.getElementById("moverPontas");
-      var moverCorpo = document.getElementById("moverCorpo");
+      var camada = document.getElementById("invertido");
       var reduzirMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      function suave(x) {   // começa e termina devagar
+        return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+      }
+
+      function limitar(v) { return Math.min(100, Math.max(0, v)); }
 
       function iniciar() {
         var inicio = performance.now();
@@ -105,29 +102,27 @@
 
         if (reduzirMovimento) return;
 
-        var tamanho = parseFloat(getComputedStyle(titulo).fontSize);
-        titulo.style.filter = "url(#pontas)";
+        var meia = LARGURA_FAIXA / 2;
 
         function quadro(agora) {
-          var t = agora - inicio;
-          if (t >= DURACAO) return;
+          var t = (agora - inicio) / DURACAO;
+          if (t >= 1) return;
 
-          var s = t / 1000;
-          // intensidade: sobe, fica no meio e some no final
-          var e = Math.pow(Math.sin(Math.PI * (t / DURACAO)), 0.6);
+          // centro da faixa (0 = borda esquerda, 1 = borda direita), de fora da tela até fora da tela
+          var de = -meia, ate = 1 + meia, centro = null;
+          if (t >= INICIO_IDA && t < FIM_IDA) {
+            centro = de + (ate - de) * suave((t - INICIO_IDA) / (FIM_IDA - INICIO_IDA));
+          } else if (t >= FIM_IDA && t < FIM_VOLTA) {
+            centro = ate - (ate - de) * suave((t - FIM_IDA) / (FIM_VOLTA - FIM_IDA));
+          }
 
-          // o raio define o que conta como "ponta": variação pequena, as pontas só "respiram"
-          var raio = (tamanho * (0.035 + 0.008 * Math.sin(s * 1.8))).toFixed(2);
-          erosao.setAttribute("radius", raio);
-          dilatacao.setAttribute("radius", raio);
-
-          // o ruído muda devagar, para as pontas ondularem em vez de tremerem
-          var fx = 0.03 + 0.006 * Math.sin(s * 1.9) + 0.003 * Math.sin(s * 4.3);
-          var fy = 0.04 + 0.008 * Math.cos(s * 2.4) + 0.004 * Math.sin(s * 3.8);
-          ruido.setAttribute("baseFrequency", fx + " " + fy);
-
-          moverPontas.setAttribute("scale", tamanho * FORCA_PONTAS * e);   // força nas pontas
-          moverCorpo.setAttribute("scale", tamanho * FORCA_CORPO * e);     // quase nenhum tremor no resto da letra
+          if (centro === null) {
+            camada.style.clipPath = "inset(0 100% 0 0)";
+          } else {
+            var esquerda = limitar((centro - meia) * 100);
+            var direita = limitar((centro + meia) * 100);
+            camada.style.clipPath = "inset(0 " + (100 - direita) + "% 0 " + esquerda + "%)";
+          }
 
           requestAnimationFrame(quadro);
         }
