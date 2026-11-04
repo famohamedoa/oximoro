@@ -1,1 +1,272 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OXIMORO | Materiais</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --fundo: #f3f4f0;
+      --texto: #870c0c;
+      --margem: clamp(1.5rem, 5vw, 4rem);
+      --lateral: clamp(1rem, 2vw, 2rem);
+
+      /* proporção da área de montagem das imagens (largura / altura) */
+      --proporcao: 1.1544;
+      /* a montagem ocupa quase toda a altura da tela, deixando espaço para o nome embaixo */
+      --palco: min(
+        calc(100vw - 2 * var(--lateral)),
+        calc((100vh - 11rem) * var(--proporcao))
+      );
+    }
+
+    @supports (height: 100dvh) {
+      :root {
+        --palco: min(
+          calc(100vw - 2 * var(--lateral)),
+          calc((100dvh - 11rem) * var(--proporcao))
+        );
+      }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      background-color: var(--fundo);
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4.5rem var(--lateral) 2rem;
+      background: var(--fundo);
+      color: var(--texto);
+      font-family: "Rubik", system-ui, sans-serif;
+      font-weight: 500;
+      animation: entrar 0.5s ease;
+    }
+
+    @keyframes entrar {
+      from { opacity: 0; }
+    }
+
+    .so-leitor {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    /* seta para voltar ao menu */
+    .voltar {
+      position: absolute;
+      top: clamp(1rem, 3.5vh, 2.25rem);
+      left: calc(var(--margem) - 0.4rem);
+      z-index: 100;
+      display: inline-flex;
+      padding: 0.4rem;
+      color: var(--texto);
+    }
+
+    .voltar svg {
+      width: clamp(2rem, 3vw, 3rem);
+      height: auto;
+      transition: transform 0.2s ease;
+    }
+
+    .voltar:hover svg,
+    .voltar:focus-visible svg {
+      transform: translateX(-5px);
+    }
+
+    .voltar:focus-visible {
+      outline: 2px solid var(--texto);
+      outline-offset: 2px;
+    }
+
+    /* área onde as imagens ficam dispostas (posições em % da área) */
+    .palco {
+      position: relative;
+      width: var(--palco);
+      aspect-ratio: 1.1544;
+    }
+
+    .item {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      width: var(--w);
+      z-index: var(--z, 1);
+      cursor: pointer;
+      transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+
+    .item img {
+      display: block;
+      width: 100%;
+      height: auto;
+      transition: filter 0.35s ease;
+    }
+
+    .item:focus-visible {
+      outline: 2px solid var(--texto);
+      outline-offset: 4px;
+    }
+
+    /* a imagem sob o mouse aumenta um pouco e vem para a frente */
+    .item.ativo {
+      z-index: 50;
+      transform: scale(1.07);
+    }
+
+    /* todas as outras ficam em preto e branco */
+    .palco.tem-ativo .item:not(.ativo) img {
+      filter: grayscale(1);
+    }
+
+    /* a amostra redonda (tricô) respeita o formato redondo ao passar o mouse */
+    .item.redondo {
+      border-radius: 50%;
+    }
+
+    .item.redondo img {
+      border-radius: 50%;
+    }
+
+    /* nome do material, embaixo das imagens */
+    .nome {
+      min-height: 2.6em;
+      margin-top: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: clamp(1.2rem, 2.2vw, 2rem);
+      line-height: 1.1;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .nome.visivel {
+      opacity: 1;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body { animation: none; }
+      .voltar svg,
+      .item,
+      .item img,
+      .nome { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <h1 class="so-leitor">Materiais</h1>
+
+  <a class="voltar" href="menu.html" aria-label="Voltar ao menu">
+    <svg viewBox="0 0 48 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+      <path d="M47 12H2M12 2L2 12L12 22" vector-effect="non-scaling-stroke"/>
+    </svg>
+  </a>
+
+  <main>
+    <!--
+      Cada imagem tem sua posição no atributo style:
+      --x = distância da esquerda, --y = distância do topo, --w = largura (tudo em % da área),
+      --z = ordem de empilhamento (maior fica na frente).
+      A altura segue a proporção original da imagem.
+    -->
+    <div class="palco" id="palco">
+      <figure class="item" tabindex="0" data-nome="zíper de metal" style="--x:27.4%; --y:1.6%; --w:27.4%; --z:1">
+        <img src="imagens/mat10.png" alt="zíper de metal">
+      </figure>
+      <figure class="item" tabindex="0" data-nome="botão tipo nó chinês" style="--x:60%; --y:4%; --w:17.9%; --z:2">
+        <img src="imagens/mat1.png" alt="botão tipo nó chinês">
+      </figure>
+      <figure class="item" tabindex="0" data-nome="denim 100% CO" style="--x:0%; --y:31.3%; --w:30.3%; --z:2">
+        <img src="imagens/mat6.png" alt="denim 100% CO">
+      </figure>
+      <figure class="item" tabindex="0" data-nome="crepe" style="--x:20.6%; --y:18.5%; --w:29%; --z:3">
+        <img src="imagens/mat9.png" alt="crepe">
+      </figure>
+      <figure class="item" tabindex="0" data-nome="viscose" style="--x:59.7%; --y:19.5%; --w:30.1%; --z:3">
+        <img src="imagens/mat8.png" alt="viscose">
+      </figure>
+      <figure class="item" tabindex="0" data-nome="crepe plissado" style="--x:22.6%; --y:54.2%; --w:29.5%; --z:3">
+        <img src="imagens/mat4.png" alt="crepe plissado">
+      </figure>
+      <figure class="item" tabindex="0" data-nome="alfaiataria xadrez" style="--x:50.7%; --y:62.9%; --w:24%; --z:4">
+        <img src="imagens/mat3.png" alt="alfaiataria xadrez">
+      </figure>
+      <figure class="item" tabindex="0" data-nome="sarja" style="--x:73.6%; --y:47.8%; --w:26.1%; --z:5">
+        <img src="imagens/mat2.png" alt="sarja">
+      </figure>
+      <figure class="item redondo" tabindex="0" data-nome="tricô artesanal em ponto de malha" style="--x:3.1%; --y:70.6%; --w:21.1%; --z:6">
+        <img src="imagens/mat5.png" alt="tricô artesanal em ponto de malha">
+      </figure>
+      <figure class="item" tabindex="0" data-nome="botão de calça jeans" style="--x:50.9%; --y:45.9%; --w:6.3%; --z:6">
+        <img src="imagens/mat7.png" alt="botão de calça jeans">
+      </figure>
+    </div>
+
+    <p class="nome" id="nome" aria-live="polite"></p>
+  </main>
+
+  <script>
+    (function () {
+      var palco = document.getElementById("palco");
+      var nome = document.getElementById("nome");
+      var itens = Array.prototype.slice.call(palco.querySelectorAll(".item"));
+      var atual = null;
+
+      function ativar(item) {
+        if (atual === item) return;
+        if (atual) atual.classList.remove("ativo");
+        atual = item;
+        item.classList.add("ativo");
+        palco.classList.add("tem-ativo");
+        nome.textContent = item.getAttribute("data-nome");
+        nome.classList.add("visivel");
+      }
+
+      function limpar() {
+        if (atual) atual.classList.remove("ativo");
+        atual = null;
+        palco.classList.remove("tem-ativo");
+        nome.classList.remove("visivel");
+      }
+
+      itens.forEach(function (item) {
+        item.addEventListener("mouseenter", function () { ativar(item); });
+        item.addEventListener("mouseleave", limpar);
+        item.addEventListener("focus", function () { ativar(item); });
+        item.addEventListener("blur", limpar);
+
+        // no celular (sem hover), o toque seleciona a imagem
+        item.addEventListener("click", function (e) {
+          e.stopPropagation();
+          ativar(item);
+        });
+      });
+
+      // toque fora das imagens limpa a seleção
+      document.addEventListener("click", limpar);
+    })();
+  </script>
+</body>
+</html>
